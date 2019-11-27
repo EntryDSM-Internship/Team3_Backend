@@ -20,6 +20,7 @@ const userRouter = require('./routes/user');
 
 app.set('port', process.env.PORT || 3001);
 app.use('/', express.static(path.join(__dirname, 'public')));
+app.use('/profiles', express.static(path.join(__dirname, 'profileImgs')));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
@@ -49,7 +50,7 @@ app.use((err, req, res) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
     res.status(err.status || 500);
-    res.json({err});
+    res.json({status: err.status, message: err.message});
 });
 
 app.listen(app.get('port'), () => {

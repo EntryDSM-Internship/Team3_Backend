@@ -27,11 +27,13 @@ module.exports = (sequelize, DataTypes) => {
         },
         private: { // 0이면 공개, 1이면 비공개
             type: DataTypes.INTEGER(11),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0
         },
         dark: { // 0이면 보통모드, 1이면 다크모드
             type: DataTypes.INTEGER(11),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0
         }
     }, {
         timestamps: true
