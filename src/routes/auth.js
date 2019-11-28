@@ -99,7 +99,9 @@ router.patch('/email-check', (req, res, next) => {
 
 router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
     const token = req.get('Authorization');
-    console.log(token);
+    console.log(req);
+    console.log(req.headers);
+    console.log(req.body);
     const {email, password, username, introduction} = req.body;
     try {
         const decode = await jwt.verify(token);
