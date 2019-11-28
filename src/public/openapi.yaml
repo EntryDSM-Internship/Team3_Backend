@@ -5,9 +5,7 @@ info:
   version: 1.0.0
 servers:
 # Added by API Auto Mocking Plugin
-- description: SwaggerHub API Auto Mocking
-  url: https://virtserver.swaggerhub.com/dkssud9556/EntrySNS/1.0.0
-- url: http://localhost:3001
+- url: http://52.79.228.100
   description: Squeaker
 tags:
   - name: authenticate
