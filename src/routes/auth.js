@@ -37,7 +37,9 @@ router.patch('/refresh', async (req, res, next) => {
         const decode = await jwt.verify(refreshTok);
         const user = await User.findOne({where:{id:decode.id}});
         if(user.refreshTok !== refreshTok) {
-            return res.status(403).json({status: 403, message: '리프레시 토큰이 유효하지 않음'})
+            const err = new Error('리프레시 토큰이 유효하지 않음');
+            err.status = 403;
+            throw err;
         }
         const access_token = await jwt.generateToken(user.id, user.username, user.email, jwt.ACCESS);
         const refresh_token = await jwt.generateToken(user.id, user.username, user.email, jwt.REFRESH);
@@ -52,7 +54,9 @@ router.post('/email-check', async (req, res, next) => {
     try {
         const user = await User.findOne({where: {email}});
         if (user) {
-            return res.status(409).json({status: 409, message: '이메일 중복'});
+            const err = new Error('이메일 중복');
+            err.status = 409;
+            throw err;
         }
         const authCode = codeGenerator();
         const transporter = nodemailer.createTransport(smtpTransport({
@@ -71,7 +75,9 @@ router.post('/email-check', async (req, res, next) => {
         };
         transporter.sendMail(mailOptions, (error, info) => {
             if(error) {
-                return res.status(400).json({status:400, message:'알맞지 않은 이메일'});
+                const err = new Error('알맞지 않은 이메일');
+                err.status = 400;
+                throw err;
             }
             client.set(email, authCode, 'EX', 180);
             return res.status(200).json({status: 200, message: '이메일 전송 성공'});
@@ -106,7 +112,9 @@ router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
     try {
         const decode = await jwt.verify(token);
         if(decode.sub !== 'email' || decode.email !== email) {
-            return res.status(401).json({status: 401, message: '유효하지 않은 토큰'});
+            const err = new Error('유효하지 않은 토큰');
+            err.status = 401;
+            throw err;
         }
         await User.create({
             email,
@@ -129,7 +137,9 @@ router.post('/login', async (req, res, next) => {
     try {
         const user = await User.findOne({where:{email}});
         if(!user || user.password !== password) {
-            return res.status(400).json({status: 400, message: '이메일 또는 비밀번호가 틀림'});
+            const err = new Error('이메일 또는 비밀번호가 틀림');
+            err.status = 400;
+            throw err;
         }
         const access_token = await jwt.generateToken(user.id, user.username, user.email, jwt.ACCESS);
         const refresh_token = await jwt.generateToken(user.id, user.username, user.email, jwt.REFRESH);
