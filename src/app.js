@@ -30,8 +30,8 @@ if(process.env.NODE_ENV === 'production') {
     app.use(helmet());
 } else {
     app.use(morgan('dev'));
-    app.use(cors());
 }
+app.use(cors());
 
 app.use('/', indexRouter);
 app.use('/follow', followRouter);
