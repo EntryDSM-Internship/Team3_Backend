@@ -1,0 +1,795 @@
+openapi: 3.0.0
+info:
+  title: Team3 API
+  description: API Docs of team 3
+  version: 1.0.0
+servers:
+# Added by API Auto Mocking Plugin
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/dkssud9556/EntrySNS/1.0.0
+- url: http://localhost:3001
+  description: Squeaker
+tags:
+  - name: authenticate
+    description: 인증
+  - name: user
+    description: 유저
+  - name: post
+    description: 게시글
+  - name: follow
+    description: 팔로우
+paths:
+  /auth/refresh:
+    patch:
+      tags:
+      - authenticate
+      summary: 사용자의 리프레시 토큰 검사
+      parameters:
+        - name: X-refresh-token
+          in: header
+          description: 사용자의 리프레시 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 토큰 재발급
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+        '403':
+          description: 리프레시 토큰이 유효하지 않음
+  /auth/email-check:
+    post:
+      tags:
+      - authenticate
+      summary: 이메일로 인증코드 보내기
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: 이메일 전송 성공
+        '400':
+          description: 알맞지 않은 이메일
+        '409':
+          description: 이메일 중복
+    patch:
+      tags:
+      - authenticate
+      summary: 이메일 인증코드 확인하기
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - authcode
+                - email
+              properties:
+                authcode:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: 이메일 인증 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '409':
+          description: 인증번호 틀림
+  /auth/signup:
+    post:
+      tags:
+      - authenticate
+      summary: 회원가입 요청
+      parameters:
+        - name: Authorization
+          in: header
+          description: 이메일 인증 성공 토큰
+          required: true
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - username
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                username:
+                  type: string
+                introduction:
+                  type: string
+                profileImg:
+                  type: string
+                  format: binary
+              example:
+                email: example@example.com
+                password: secret
+                username: user1
+                introduction: Hello, I'm OOO.
+      responses:
+        '201':
+          description: 회원가입 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '409':
+          description: 이메일 인증 필요
+  /auth/login:
+    post:
+      tags:
+      - authenticate
+      summary: 로그인 요청
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              example:
+                email: example@example.com
+                password: secret
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                example:
+                  access_token: string
+                  refresh_token: string
+        '400':
+          description: 이메일 또는 비밀번호가 틀림
+  /auth/logout:
+    delete:
+      tags:
+      - authenticate
+      summary: 로그아웃 요청
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 사용자의 액세스 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 로그아웃 성공
+        '403':
+          description: 토큰 유효기간 만료
+        '401':
+          description: 유효하지 않은 토큰
+  /users:
+    get:
+      tags:
+      - user
+      summary: 검색한 유저 목록 불러오기
+      parameters:
+        - name: username
+          in: query
+          description: 유저의 닉네임
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 해당 닉네임의 유저 정보들을 불러옴
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+                example:
+                  - id: 3
+                    private: true
+                    username: user1
+                    email: example@exmpale.com
+                    profileImg: url
+                    introduction: Hello
+  /user/{id}:
+    get:
+      tags:
+      - user
+      summary: 프로필 불러오기
+      parameters:
+        - name: id
+          in: path
+          description: 유저의 고유 식별번호
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 해당 유저의 프로필 불러오기 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: 
+                    type: integer
+                  private:
+                    type: boolean
+                    description: 비공개 여부
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  profileImg:
+                    type: string
+                    format: url
+                  introduction:
+                    type: string
+                  following:
+                    type: integer
+                  follower:
+                    type: integer
+                  squeaks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        content:
+                          type: string
+                        img:
+                          type: string
+                        userId:
+                          type: integer
+                        createdAt:
+                          type: date
+                        like:
+                          type: integer
+                        Comment:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                              comment:
+                                type: string
+                              userId:
+                                type: integer
+                              postId:
+                                type: integer
+                              createdAt:
+                                type: date
+                example:
+                  private: true
+                  id: 3
+                  username: user1
+                  email: example@example.com
+                  profileImg: url
+                  introduction: Hello, I'm OOO
+                  following: 142
+                  follower: 1412
+                  squeaks:
+                    - id: 1
+                      content: string
+                      img: url
+                      userId: 3
+                      createdAt: date
+                      like: 21
+                      Comment:
+                        - id: 1
+                          comment: string
+                          userId: 2
+                          postId: 1
+                          createdAt: date
+        '404':
+          description: 해당 유저를 찾을 수 없음
+        '403':
+          description: 토큰 유효기간 만료
+        '401':
+          description: 유효하지 않은 토큰
+  /user/dark:
+    patch:
+      tags:
+      - user
+      summary: 다크모드 설정
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: dark
+          in: query
+          description: 1이면 다크모드 0이면 다크모드 아님
+          required: true
+          type: boolean
+      responses:
+        '201':
+          description: 다크모드 설정 성공
+        '400':
+          description: dark 값이 적절하지 않음
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+  /user:
+    patch:
+      tags:
+      - user
+      summary: 프로필 변경하기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                introduction:
+                  type: string
+      responses:
+        '201':
+          description: 프로필 변경 성공
+        '401': 
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+  /user/img:
+    patch:
+      tags:
+      - user
+      summary: 프로필 사진 변경하기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profileImg: 
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: 프로필 사진 변경 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+  /user/status:
+    patch:
+      tags:
+      - user
+      summary: 계정 공개, 비공개 설정
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: status
+          in: query
+          description: 1이면 비공개 0이면 공개 (둘다 아니면 400)
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 계정 상태 변경 성공
+        '400':
+          description: status 값이 적절하지 않음
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+  /user/{id}/followings:
+    get:
+      tags:
+      - user
+      summary: 유저가 팔로우 하고 있는 유저들의 리스트
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 유저의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 팔로잉 리스트 불러오기 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 유저가 존재하지 않음
+  /user/{id}/followers:
+    get:
+      tags:
+      - user
+      summary: 유저를 팔로우 하고 있는 유저들의 리스트
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 유저의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 팔로워 리스트 불러오기 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 유저가 존재하지 않음
+  /posts:
+    get:
+      tags:
+      - post
+      summary: 게시물 불러오기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 게시물 불러오기 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    deleteable:
+                      type: boolean
+                    like:
+                      type: integer
+                    content:
+                      type: string
+                    imgs:
+                      type: string
+                      format: url
+                    userId:
+                      type: integer
+                    createdAt:
+                      type: date
+                    User:
+                      type: array
+                      items:
+                        type: object
+                        $ref: '#/components/schemas/User'
+                    Comment:
+                      type: array
+                      items:
+                        type: object
+                        $ref: '#/components/schemas/Post'
+        '403':
+          description: 토큰 유효기간 만료
+        '401':
+          description: 유효하지 않은 토큰
+  /post:
+    post:
+      tags:
+      - post
+      summary: 게시물 올리기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                imgs:
+                  type: array
+                  format: binary
+                content:
+                  type: string
+      responses:
+        '201':
+          description: 게시물 올리기 성공
+        '403':
+          description: 토큰 유효기간 만료
+        '401':
+          description: 유효하지 않은 토큰
+  /post/{id}:
+    delete:
+      tags:
+      - post
+      summary: 게시물 삭제하기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 삭제할 게시물의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 게시물 삭제 성공
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 게시물이 존재하지 않음
+        '401':
+          description: 유효하지 않은 토큰
+        '409':
+          description: 로그인한 유저와 게시물의 유저가 불일치
+  /post/{id}/like:
+    post:
+      tags:
+      - post
+      summary: 게시물 좋아요
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 게시물의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '201':
+          description: 게시물 좋아요 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 게시물이 존재하지 않음
+        '409':
+          descriptino: 이미 좋아요 누름
+    delete:
+      tags:
+      - post
+      summary: 게시물 좋아요 취소
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 게시물의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 게시물 좋아요 취소 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 게시물이 존재하지 않음
+        '409':
+          description: 좋아요를 누르지 않음
+  /post/{id}/comment:
+    post:
+      tags:
+      - post
+      summary: 게시물에 댓글 작성
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 게시물의 고유 식별번호
+          required: true
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: 댓글 작성 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 게시물이 존재하지 않음
+  /follow/{id}:
+    post:
+      tags:
+      - follow
+      summary: 팔로우
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 팔로우 당할 유저의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '201':
+          description: 팔로우 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 유저가 존재하지 않음
+        '409':
+          description: 비공개 계정에 팔로우를 시도함
+    delete:
+      tags:
+      - follow
+      summary: 팔로우 취소
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 팔로우 취소 당할 유저의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 팔로우 취소 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 유저가 존재하지 않음
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        profileImg:
+          type: string
+        introduction:
+          type: string
+        refreshTok:
+          type: string
+        private:
+          type: boolean
+        dark:
+          type: boolean
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        userId:
+          type: integer
+        createdAt:
+          type: date
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        comment:
+          type: string
+        userId:
+          type: integer
+        postId:
+          type: integer
+        createdAt:
+          type: date
+    Like:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        postId:
+          type: integer
+    Follow:
+      type: object
+      properties:
+        id:
+          type: integer
+        following:
+          type: integer
+        follower:
+          type: integer
