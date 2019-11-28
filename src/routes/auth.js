@@ -9,7 +9,6 @@ const fs = require('fs');
 const multer = require('multer');
 const jwt = require('../jwt');
 const path = require('path');
-const jwtBlacklist = require('jwt-blacklist');
 const {codeGenerator} = require('../codeGenerator');
 require('dotenv').config();
 
@@ -38,13 +37,13 @@ router.patch('/refresh', async (req, res, next) => {
         const decode = await jwt.verify(refreshTok);
         const user = await User.findOne({where:{id:decode.id}});
         if(user.refreshTok !== refreshTok) {
-            res.status(403).json({status: 403, message: '리프레시 토큰이 유효하지 않음'});
+            return res.status(403).json({status: 403, message: '리프레시 토큰이 유효하지 않음'})
         }
         const access_token = await jwt.generateToken(user.id, user.username, user.email, jwt.ACCESS);
         const refresh_token = await jwt.generateToken(user.id, user.username, user.email, jwt.REFRESH);
         res.status(200).json({status: 200, message: '토큰 재발급', access_token, refresh_token});
     } catch(err) {
-        res.status(403).json({status: 403, message: '리프레시 토큰이 유효하지 않음'});
+        next(err);
     }
 })
 
@@ -100,6 +99,7 @@ router.patch('/email-check', (req, res, next) => {
 
 router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
     const token = req.get('Authorization');
+    console.log(token);
     const {email, password, username, introduction} = req.body;
     try {
         const decode = await jwt.verify(token);
@@ -140,8 +140,14 @@ router.post('/login', async (req, res, next) => {
 });
 
 router.delete('/logout', async (req, res, next) => {
-    const accessTok = req.get('Authorization');
-    // TODO 로그아웃 구현
+    const refreshTok = req.get('X-refresh-token');
+    try {
+        await User.update({refreshTok:null}, {where:{refreshTok}});
+        jwt.blackList(refreshTok);
+        return res.status(200).json({status: 200, message: '로그아웃 성공'});
+    } catch(err) {
+        next(err);
+    }
 });
 
 module.exports = router;

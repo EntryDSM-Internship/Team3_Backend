@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
+const jwtBlacklist = require('jwt-blacklist')(jwt);
 require('dotenv').config();
 const ACCESS = 'access';
 const REFRESH = 'refresh';
 const EMAIL = 'email';
 
-const generateToken = async (id, username, email, sub) => {
-    return await jwt.sign({
+const generateToken = (id, username, email, sub) => {
+    return jwtBlacklist.sign({
         id,
         username,
         email
@@ -15,8 +16,8 @@ const generateToken = async (id, username, email, sub) => {
     });
 }
 
-const generateEmailToken = async (email) => {
-    return await jwt.sign({
+const generateEmailToken = (email) => {
+    return jwtBlacklist.sign({
         email
     }, process.env.JWT, {
         subject: 'email',
@@ -24,8 +25,13 @@ const generateEmailToken = async (email) => {
     });
 }
 
-const verify = async (token) => {
-    return await jwt.verify(token, process.env.JWT);
+const verify = (token) => {
+    return jwtBlacklist.verify(token, process.env.JWT);
 }
 
-module.exports = {ACCESS, REFRESH, generateToken, EMAIL, generateEmailToken, verify};
+const blackList = (token) => {
+    jwtBlacklist.blacklist(token);
+    return;
+}
+
+module.exports = {blackList, ACCESS, REFRESH, generateToken, EMAIL, generateEmailToken, verify};

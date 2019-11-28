@@ -187,18 +187,14 @@ paths:
       - authenticate
       summary: 로그아웃 요청
       parameters:
-        - name: Authorization
+        - name: X-refresh-token
           in: header
-          description: 로그인한 사용자의 액세스 토큰
+          description: 로그인한 사용자의 리프레시 토큰
           required: true
           type: string
       responses:
         '200':
           description: 로그아웃 성공
-        '403':
-          description: 토큰 유효기간 만료
-        '401':
-          description: 유효하지 않은 토큰
   /users:
     get:
       tags:

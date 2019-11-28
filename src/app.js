@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const sequelize = require('./models').sequelize;
 const hpp = require('hpp');
 const logger = require('./logger');
-const methodOverride = require('method-override');
 const cors = require('cors');
 require('dotenv').config();
 
