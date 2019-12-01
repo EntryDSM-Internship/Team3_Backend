@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const redis = require('redis');
-const client = redis.createClient();
+const client = require('redis').createClient();
 const User = require('../models').User;
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
@@ -105,9 +104,6 @@ router.patch('/email-check', (req, res, next) => {
 
 router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
     const token = req.get('Authorization');
-    console.log(req);
-    console.log(req.headers);
-    console.log(req.body);
     const {email, password, username, introduction} = req.body;
     try {
         const decode = await jwt.verify(token);
@@ -143,7 +139,6 @@ router.post('/login', async (req, res, next) => {
         }
         const access_token = await jwt.generateToken(user.id, user.username, user.email, jwt.ACCESS);
         const refresh_token = await jwt.generateToken(user.id, user.username, user.email, jwt.REFRESH);
-        console.log(refresh_token);
         await User.update({refreshTok:refresh_token}, {where:{id:user.id}});
         return res.status(200).json({status: 200, message: '로그인 성공', access_token, refresh_token});
     } catch(err) {
