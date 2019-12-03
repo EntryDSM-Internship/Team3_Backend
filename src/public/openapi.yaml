@@ -690,6 +690,8 @@ paths:
       responses:
         '201':
           description: 팔로우 성공
+        '400':
+          description: 자신을 팔로우할 수는 없음
         '401':
           description: 유효하지 않은 토큰
         '403':

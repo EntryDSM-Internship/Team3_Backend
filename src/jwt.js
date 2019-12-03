@@ -30,14 +30,15 @@ const verify = (token) => {
         const decoded = jwtBlacklist.verify(token, process.env.JWT);
         return decoded;
     } catch(err) {
+        let error = {};
         if(err.name === 'TokenExpiredError') {
-            const error = new Error('토큰 유효기간 만료');
+            error = new Error('토큰 유효기간 만료');
             error.status = 403;
-            next(error);
+        } else {
+            error = new Error('유효하지 않은 토큰');
+            error.status = 401;
         }
-        const error = new Error('유효하지 않은 토큰');
-        error.status = 401;
-        next(error);
+        throw error;
     }
 }
 
