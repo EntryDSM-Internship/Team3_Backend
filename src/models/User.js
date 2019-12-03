@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         refreshTok: {
-            type: DataTypes.STRING(220),
+            type: DataTypes.STRING(260),
             allowNull: true
         },
         private: { // 0이면 공개, 1이면 비공개

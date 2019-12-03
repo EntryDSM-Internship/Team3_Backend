@@ -26,7 +26,19 @@ const generateEmailToken = (email) => {
 }
 
 const verify = (token) => {
-    return jwtBlacklist.verify(token, process.env.JWT);
+    try {
+        const decoded = jwtBlacklist.verify(token, process.env.JWT);
+        return decoded;
+    } catch(err) {
+        if(err.name === 'TokenExpiredError') {
+            const error = new Error('토큰 유효기간 만료');
+            error.status = 403;
+            next(error);
+        }
+        const error = new Error('유효하지 않은 토큰');
+        error.status = 401;
+        next(error);
+    }
 }
 
 const blackList = (token) => {
