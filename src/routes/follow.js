@@ -41,7 +41,7 @@ router.delete('/:id', async (req, res, next) => {
             const error = new Error('해당 id의 유저가 존재하지 않음');
             error.status = 404;
             throw error;
-        }
+        } 
         await deleted.removeFollowings(user.id);
         return res.status(200).json({status: 200, message: '팔로우 취소 성공'});
     } catch(err) {
