@@ -33,7 +33,7 @@ router.patch('/img', upload.single('profileImg'), async (req, res, next) => {
                 if(err) {
                     console.error(err);
                 }
-            });   
+            });
         }
         await User.update({profileImg: req.file.filename}, {where:{id:user.id}});
         return res.status(200).json({status: 200, message: '프로필 사진 변경 성공'});
