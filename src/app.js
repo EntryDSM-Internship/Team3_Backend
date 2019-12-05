@@ -36,19 +36,15 @@ app.use('/follow', followRouter);
 app.use('/post', postRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
-
 app.use((req, res, next) => {
     const err = new Error('Not Found');
     err.status = 404;
-    logger.info(req.method + ' ' + req.url + 'Error: ' + err.message);
     next(err);
 });
 
-app.use((err, req, res) => {
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-    res.status(err.status || 500);
-    res.json({status: err.status, message: err.message});
+app.use((err, req, res, next) => {
+    logger.info(req.method + ' ' + req.url + 'Error: ' + err.message);
+    res.status(err.status || 500).json({status: err.status, message: err.message});
 });
 
 app.listen(app.get('port'), () => {

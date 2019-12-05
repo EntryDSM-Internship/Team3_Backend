@@ -176,9 +176,15 @@ paths:
                     type: string
                   refresh_token:
                     type: string
+                  dark:
+                    type: boolean
+                  private:
+                    type: boolean
                 example:
                   access_token: string
                   refresh_token: string
+                  dark: true
+                  private: false
         '400':
           description: 이메일 또는 비밀번호가 틀림
   /auth/logout:
@@ -335,20 +341,30 @@ paths:
           description: 로그인한 유저의 액세스 토큰
           required: true
           type: string
-        - name: dark
-          in: query
-          description: 1이면 다크모드 0이면 다크모드 아님
-          required: true
-          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dark:
+                  type: boolean
       responses:
         '201':
           description: 다크모드 설정 성공
-        '400':
-          description: dark 값이 적절하지 않음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dark:
+                    type: boolean
         '401':
           description: 유효하지 않은 토큰
         '403':
           description: 토큰 유효기간 만료
+        '409':
+          description: 이미 다크모드 또는 보통모드임
   /user:
     patch:
       tags:
@@ -400,11 +416,32 @@ paths:
       responses:
         '201':
           description: 프로필 사진 변경 성공
+        '400':
+          description: 사진이 없음
         '401':
           description: 유효하지 않은 토큰
         '403':
           description: 토큰 유효기간 만료
-  /user/status:
+    delete:
+      tags:
+      - user
+      summary: 프로필 사진 없애기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 프로필 사진 삭제 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '409':
+          description: 삭제할 프사가 없음
+  /user/private:
     patch:
       tags:
       - user
@@ -415,20 +452,30 @@ paths:
           description: 로그인한 유저의 액세스 토큰
           required: true
           type: string
-        - name: status
-          in: query
-          description: 1이면 비공개 0이면 공개 (둘다 아니면 400)
-          required: true
-          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                private:
+                  type: boolean
       responses:
         '200':
           description: 계정 상태 변경 성공
-        '400':
-          description: status 값이 적절하지 않음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  private:
+                    type: boolean
         '401':
           description: 유효하지 않은 토큰
         '403':
           description: 토큰 유효기간 만료
+        '409':
+          description: 이미 공개 또는 비공개임
   /user/{id}/followings:
     get:
       tags:
