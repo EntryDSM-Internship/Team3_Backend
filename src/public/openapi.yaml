@@ -495,6 +495,23 @@ paths:
       responses:
         '200':
           description: 팔로잉 리스트 불러오기 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    profileImg:
+                      type: string
+                    introduction:
+                      type: string
         '401':
           description: 유효하지 않은 토큰
         '403':
@@ -686,6 +703,45 @@ paths:
         '409':
           description: 좋아요를 누르지 않음
   /post/{id}/comment:
+    get:
+      tags:
+      - post
+      summary: 게시물의 댓글 불러오기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 게시물의 고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 댓글 불러오기 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    comment:
+                      type: string
+                    createdAt:
+                      type: date
+                    user:
+                      type: object
+                    postId:
+                      type: integer
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 해당 id의 게시물이 존재하지 않음
     post:
       tags:
       - post

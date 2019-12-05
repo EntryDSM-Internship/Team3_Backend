@@ -28,11 +28,13 @@ router.patch('/img', upload.single('profileImg'), async (req, res, next) => {
     try {
         const user = await jwt.verify(token);
         const {profileImg} = await User.findOne({where:{id:user.id}});
-        fs.unlink(path.join(__dirname, '..', 'profileImgs', profileImg), (err) => {
-            if(err) {
-                console.error(err);
-            }
-        });
+        if(profileImg) {
+            fs.unlink(path.join(__dirname, '..', 'profileImgs', profileImg), (err) => {
+                if(err) {
+                    console.error(err);
+                }
+            });   
+        }
         await User.update({profileImg: req.file.filename}, {where:{id:user.id}});
         return res.status(200).json({status: 200, message: '프로필 사진 변경 성공'});
     } catch(err) {
@@ -109,22 +111,51 @@ router.get('/:id/followings', async (req, res, next) => {
             throw error;
         }
         const decoded = await jwt.verify(token);
-        const a = await user.getFollowers();
+        const followers = await user.getFollowers();
         let arr = [];
-        for(i in a) {
-            let tempObj = a[i].dataValues;
+        for(i in followers) {
+            let tempObj = followers[i].dataValues;
             delete tempObj.refreshTok;
-            delete tempObj.private;
             delete tempObj.dark;
             delete tempObj.password;
             delete tempObj.createdAt;
             delete tempObj.updatedAt;
+            delete tempObj.Follow;
             arr.push(tempObj);
         }
-        res.json({arr});
+        res.status(200).json({status: 200, message: '팔로잉 리스트 불러오기 성공', followings:arr});
     } catch(err) {
         next(err);
     }
+});
+
+router.get('/:id/followers', async (req, res, next) => {
+    const token = req.get('Authorization');
+    const {id} = req.params;
+    try {
+        const user = await User.findOne({where:{id}});
+        if(!user) {
+            const error = new Error('해당 유저가 존재하지 않음');
+            error.status = 404;
+            throw error;
+        }
+        const decoded = await jwt.verify(token);
+        const followings = await user.getFollowings();
+        let arr = [];
+        for(i in followings) {
+            let tempObj = followings[i].dataValues;
+            delete tempObj.password;
+            delete tempObj.refreshTok;
+            delete tempObj.dark;
+            delete tempObj.createdAt;
+            delete tempObj.updatedAt;
+            delete tempObj.Follow;
+            arr.push(tempObj);
+        }
+        res.status(200).json({status: 200, message: '팔로워 리스트 불러오기 성공', followers:arr});
+    } catch(err) {
+        next(err);
+    } 
 });
 
 module.exports = router;
