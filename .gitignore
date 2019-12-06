@@ -4,3 +4,4 @@ config
 info.log
 error.log
 profileImgs
+jwt-data
