@@ -155,7 +155,7 @@ router.get('/:id/followers', async (req, res, next) => {
         res.status(200).json({status: 200, message: '팔로워 리스트 불러오기 성공', followers:arr});
     } catch(err) {
         next(err);
-    } 
+    }
 });
 
 module.exports = router;
