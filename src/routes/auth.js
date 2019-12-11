@@ -42,6 +42,7 @@ router.patch('/refresh', async (req, res, next) => {
         }
         const access_token = await jwt.generateToken(user.id, user.username, user.email, jwt.ACCESS);
         const refresh_token = await jwt.generateToken(user.id, user.username, user.email, jwt.REFRESH);
+        await User.update({refreshTok:refresh_token}, {where:{id:user.id}});
         res.status(200).json({status: 200, message: '토큰 재발급', access_token, refresh_token});
     } catch(err) {
         next(err);
