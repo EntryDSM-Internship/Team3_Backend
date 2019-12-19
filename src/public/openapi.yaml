@@ -675,7 +675,7 @@ paths:
         '404':
           description: 해당 id의 게시물이 존재하지 않음
         '409':
-          descriptino: 이미 좋아요 누름
+          description: 이미 좋아요 누름
     delete:
       tags:
       - post
