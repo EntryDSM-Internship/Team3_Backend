@@ -4,6 +4,7 @@ const multer = require('multer');
 const jwt = require('../jwt');
 const fs = require('fs');
 const path = require('path');
+const {isLoggedIn} = require('../middlewares/loginCheck');
 const User = require('../models').User;
 
 const upload = multer({
@@ -18,16 +19,15 @@ const upload = multer({
     })
 });
 
-router.patch('/img', upload.single('profileImg'), async (req, res, next) => {
+router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, next) => {
     if(!req.hasOwnProperty('file')) {
         const error = new Error('사진이 없음');
         error.status = 400;
         throw error;
     }
-    const token = req.get('Authorization');
     try {
-        const user = await jwt.verify(token);
-        const {profileImg} = await User.findOne({where:{id:user.id}});
+        const decoded = req.decoded;
+        const {profileImg} = await User.findOne({where:{id:decoded.id}});
         if(profileImg) {
             fs.unlink(path.join(__dirname, '..', 'profileImgs', profileImg), (err) => {
                 if(err) {
@@ -35,17 +35,16 @@ router.patch('/img', upload.single('profileImg'), async (req, res, next) => {
                 }
             });
         }
-        await User.update({profileImg: req.file.filename}, {where:{id:user.id}});
+        await User.update({profileImg: req.file.filename}, {where:{id:decoded.id}});
         return res.status(200).json({status: 200, message: '프로필 사진 변경 성공'});
     } catch(err) {
         next(err);
     }
 });
 
-router.delete('/img', async (req, res, next) => {
-    const token = req.get('Authorization');
+router.delete('/img', isLoggedIn, async (req, res, next) => {
     try {
-        const decoded = await jwt.verify(token);
+        const decoded = req.decoded;
         const user = await User.findOne({where:{id:decoded.id}});
         if(!user.profileImg) {
             const error = new Error('삭제할 프사가 없음');
@@ -64,11 +63,10 @@ router.delete('/img', async (req, res, next) => {
     }
 });
 
-router.patch('/dark', async (req, res, next) => {
-    const token = req.get('Authorization');
+router.patch('/dark', isLoggedIn, async (req, res, next) => {
     const {dark} = req.body;
     try {
-        const decoded = await jwt.verify(token);
+        const decoded = req.decoded;
         const user = await User.findOne({where:{id:decoded.id}});
         if(dark === user.dark) {
             const error = new Error('이미 다크모드 또는 보통모드임');
@@ -82,11 +80,10 @@ router.patch('/dark', async (req, res, next) => {
     }
 });
 
-router.patch('/private', async (req, res, next) => {
-    const token = req.get('Authorization');
+router.patch('/private', isLoggedIn, async (req, res, next) => {
     const {private} = req.body;
     try {
-        const decoded = await jwt.verify(token);
+        const decoded = req.decoded;
         const user = await User.findOne({where:{id:decoded.id}});
         if(private === user.private) {
             const error = new Error('이미 공개 또는 비공개임');
@@ -100,9 +97,8 @@ router.patch('/private', async (req, res, next) => {
     }
 });
 
-router.get('/:id/followings', async (req, res, next) => {
-    const token = req.get('Authorization');
-    const {id} = req.params;
+router.get('/:id/followings', isLoggedIn, async (req, res, next) => {
+    const id = req.params.id;
     try {
         const user = await User.findOne({where:{id}});
         if(!user) {
@@ -110,7 +106,6 @@ router.get('/:id/followings', async (req, res, next) => {
             error.status = 404;
             throw error;
         }
-        const decoded = await jwt.verify(token);
         const followers = await user.getFollowers();
         let arr = [];
         for(i in followers) {
@@ -123,15 +118,14 @@ router.get('/:id/followings', async (req, res, next) => {
             delete tempObj.Follow;
             arr.push(tempObj);
         }
-        res.status(200).json({status: 200, message: '팔로잉 리스트 불러오기 성공', followings:arr});
+        return res.status(200).json({status: 200, message: '팔로잉 리스트 불러오기 성공', followings:arr});
     } catch(err) {
         next(err);
     }
 });
 
-router.get('/:id/followers', async (req, res, next) => {
-    const token = req.get('Authorization');
-    const {id} = req.params;
+router.get('/:id/followers', isLoggedIn, async (req, res, next) => {
+    const id = req.params.id;
     try {
         const user = await User.findOne({where:{id}});
         if(!user) {
@@ -139,7 +133,6 @@ router.get('/:id/followers', async (req, res, next) => {
             error.status = 404;
             throw error;
         }
-        const decoded = await jwt.verify(token);
         const followings = await user.getFollowings();
         let arr = [];
         for(i in followings) {
@@ -152,7 +145,7 @@ router.get('/:id/followers', async (req, res, next) => {
             delete tempObj.Follow;
             arr.push(tempObj);
         }
-        res.status(200).json({status: 200, message: '팔로워 리스트 불러오기 성공', followers:arr});
+        return res.status(200).json({status: 200, message: '팔로워 리스트 불러오기 성공', followers:arr});
     } catch(err) {
         next(err);
     }

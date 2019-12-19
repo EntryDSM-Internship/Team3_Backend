@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('../jwt');
+const {isLoggedIn} = require('../middlewares/loginCheck');
 const User = require('../models').User;
 
-router.post('/:id', async (req, res, next) => {
+router.post('/:id', isLoggedIn, async (req, res, next) => { // TODO 이미 팔로우한 것에 대한 처리
     const id = req.params.id; // 팔로우 당할 유저의 id
-    const token = req.get('Authorization');
     try {
-        const user = await jwt.verify(token);
-        if(user.id === Number(id)) {
+        const decoded = req.decoded;
+        if(decoded.id === Number(id)) {
             const error = new Error('자신을 팔로우할 수는 없음');
             error.status = 400;
             throw error;
@@ -24,25 +24,25 @@ router.post('/:id', async (req, res, next) => {
             error.status = 409;
             throw error;
         }
-        await followed.setFollowings(user.id);
+        await followed.addFollowings(decoded.id);
         return res.status(201).json({status: 201, message: '팔로우 성공'});
     } catch(err) {
         next(err);
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', isLoggedIn, async (req, res, next) => {
     const id = req.params.id; // 팔로우 취소 당할 유저의 id
     const token = req.get('Authorization'); 
     try {
-        const user = await jwt.verify(token);
+        const decoded = req.decoded;
         const deleted = await User.findOne({where:{id}});
         if(!deleted) {
             const error = new Error('해당 id의 유저가 존재하지 않음');
             error.status = 404;
             throw error;
         } 
-        await deleted.removeFollowings(user.id);
+        await deleted.removeFollowings(decoded.id);
         return res.status(200).json({status: 200, message: '팔로우 취소 성공'});
     } catch(err) {
         next(err);
