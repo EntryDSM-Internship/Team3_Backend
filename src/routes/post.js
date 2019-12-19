@@ -134,7 +134,6 @@ router.post('/:id/comment', isLoggedIn, async (req, res, next) => {
 });
 
 router.get('/:id/comment', isLoggedIn, async (req, res, next) => {
-    const decoded = req.decoded;
     const id = req.params.id;
     try {
         const post = await Post.findOne({where:{id}});
@@ -145,7 +144,8 @@ router.get('/:id/comment', isLoggedIn, async (req, res, next) => {
         }
         const comments = await Comment.findAll({
             where:{postId:id},
-            include: [{model:User, required:true}]
+            attributes: ['id', 'comment', 'createdAt', 'userId', 'postId'],
+            include: [{model:User, required:true, attributes: ['id', 'username', 'email', 'profileImg', 'private', 'createdAt']}]
         });
         return res.status(200).json({status: 200, message: '댓글 불러오기 성공', comments});
     } catch(err) {
