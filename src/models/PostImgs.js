@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('post', {
-        content: {
-            type: DataTypes.STRING(512),
+    return sequelize.define('postImgs', {
+        name: {
+            type: DataTypes.STRING(260),
             allowNull: false
         }
     }, {
