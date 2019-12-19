@@ -12,7 +12,7 @@ const generateToken = (id, username, email, sub) => {
         email
     }, process.env.JWT, {
         subject: sub,
-        expiresIn: sub === ACCESS ? '1m' : '5m'
+        expiresIn: sub === ACCESS ? '1m' : '5m' // TODO 시간 다시 바꿔야 함.
     });
 }
 
