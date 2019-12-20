@@ -148,7 +148,7 @@ router.get('/:id/comment', isLoggedIn, async (req, res, next) => {
         });
         return res.status(200).json({status: 200, message: '댓글 불러오기 성공', comments});
     } catch(err) {
-        next(err);  
+        next(err);
     }
 });
 
