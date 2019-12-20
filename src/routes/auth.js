@@ -140,7 +140,6 @@ router.post('/login', async (req, res, next) => {
         }
         const access_token = await jwt.generateToken(user.id, user.username, user.email, jwt.ACCESS);
         const refresh_token = await jwt.generateToken(user.id, user.username, user.email, jwt.REFRESH);
-        console.log(refresh_token);
         await User.update({refreshTok:refresh_token}, {where:{id:user.id}});
         return res.status(200).json({status: 200, message: '로그인 성공', access_token, refresh_token});
     } catch(err) {
@@ -150,8 +149,10 @@ router.post('/login', async (req, res, next) => {
 
 router.delete('/logout', async (req, res, next) => {
     const refreshTok = req.get('X-refresh-token');
+    const accessTok = req.get('Authorization');
     try {
         await User.update({refreshTok:null}, {where:{refreshTok}});
+        jwt.blackList(accessTok);
         jwt.blackList(refreshTok);
         return res.status(200).json({status: 200, message: '로그아웃 성공'});
     } catch(err) {

@@ -543,7 +543,7 @@ paths:
           description: 토큰 유효기간 만료
         '404':
           description: 해당 유저가 존재하지 않음
-  /posts:
+  /posts/{page}:
     get:
       tags:
       - post
@@ -554,6 +554,11 @@ paths:
           description: 현재 로그인한 유저의 액세스 토큰
           required: true
           type: string
+        - name: page
+          in: path
+          description: 페이지. 0 ~
+          required: true
+          type: integer
       responses:
         '200':
           description: 게시물 불러오기 성공

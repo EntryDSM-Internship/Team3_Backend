@@ -106,19 +106,8 @@ router.get('/:id/followings', isLoggedIn, async (req, res, next) => {
             error.status = 404;
             throw error;
         }
-        const followers = await user.getFollowers();
-        let arr = [];
-        for(i in followers) {
-            let tempObj = followers[i].dataValues;
-            delete tempObj.refreshTok;
-            delete tempObj.dark;
-            delete tempObj.password;
-            delete tempObj.createdAt;
-            delete tempObj.updatedAt;
-            delete tempObj.Follow;
-            arr.push(tempObj);
-        }
-        return res.status(200).json({status: 200, message: '팔로잉 리스트 불러오기 성공', followings:arr});
+        const followings = await user.getFollowers({attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']});
+        return res.status(200).json({status: 200, message: '팔로잉 리스트 불러오기 성공', followings});
     } catch(err) {
         next(err);
     }
@@ -133,19 +122,8 @@ router.get('/:id/followers', isLoggedIn, async (req, res, next) => {
             error.status = 404;
             throw error;
         }
-        const followings = await user.getFollowings();
-        let arr = [];
-        for(i in followings) {
-            let tempObj = followings[i].dataValues;
-            delete tempObj.password;
-            delete tempObj.refreshTok;
-            delete tempObj.dark;
-            delete tempObj.createdAt;
-            delete tempObj.updatedAt;
-            delete tempObj.Follow;
-            arr.push(tempObj);
-        }
-        return res.status(200).json({status: 200, message: '팔로워 리스트 불러오기 성공', followers:arr});
+        const followers = await user.getFollowings({attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']});
+        return res.status(200).json({status: 200, message: '팔로워 리스트 불러오기 성공', followers});
     } catch(err) {
         next(err);
     }
