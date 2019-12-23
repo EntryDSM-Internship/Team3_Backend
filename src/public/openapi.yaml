@@ -266,42 +266,12 @@ paths:
                     format: url
                   introduction:
                     type: string
-                  following:
+                  followings:
                     type: integer
-                  follower:
+                  followers:
                     type: integer
-                  squeaks:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        content:
-                          type: string
-                        img:
-                          type: string
-                        userId:
-                          type: integer
-                        createdAt:
-                          type: date
-                        like:
-                          type: integer
-                        Comment:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              id:
-                                type: integer
-                              comment:
-                                type: string
-                              userId:
-                                type: integer
-                              postId:
-                                type: integer
-                              createdAt:
-                                type: date
+                  me:
+                    type: boolean
                 example:
                   private: true
                   id: 3
@@ -309,27 +279,39 @@ paths:
                   email: example@example.com
                   profileImg: url
                   introduction: Hello, I'm OOO
-                  following: 142
-                  follower: 1412
-                  squeaks:
-                    - id: 1
-                      content: string
-                      img: url
-                      userId: 3
-                      createdAt: date
-                      like: 21
-                      Comment:
-                        - id: 1
-                          comment: string
-                          userId: 2
-                          postId: 1
-                          createdAt: date
+                  followings: 142
+                  followers: 1412
         '404':
           description: 해당 유저를 찾을 수 없음
         '403':
           description: 토큰 유효기간 만료
         '401':
           description: 유효하지 않은 토큰
+  /user/{id}/posts/{page}:
+    get:
+      tags:
+      - user
+      summary: 해당 id를 가진 유저의 게시글만 불러오기
+      parameters:
+        - name: id
+          in: path
+          description: 유저의 고유 식별번호
+          required: true
+          type: integer
+        - name: page
+          in: path
+          description: 페이지. 0 ~
+        required: true
+          type: integer
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 불러오기 성공
+          
   /user/dark:
     patch:
       tags:
@@ -571,7 +553,7 @@ paths:
                   properties:
                     id:
                       type: integer
-                    deleteable:
+                    deletable:
                       type: boolean
                     like:
                       type: integer
@@ -589,11 +571,6 @@ paths:
                       items:
                         type: object
                         $ref: '#/components/schemas/User'
-                    Comment:
-                      type: array
-                      items:
-                        type: object
-                        $ref: '#/components/schemas/Post'
         '403':
           description: 토큰 유효기간 만료
         '401':
