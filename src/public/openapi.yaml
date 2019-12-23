@@ -301,7 +301,7 @@ paths:
         - name: page
           in: path
           description: 페이지. 0 ~
-        required: true
+          required: true
           type: integer
         - name: Authorization
           in: header
