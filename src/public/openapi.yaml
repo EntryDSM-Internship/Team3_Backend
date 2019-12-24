@@ -198,6 +198,11 @@ paths:
           description: 로그인한 사용자의 리프레시 토큰
           required: true
           type: string
+        - name: Authorization
+          in: header
+          description: 로그인한 사용자의 액세스 토큰
+          required: true
+          type: string
       responses:
         '200':
           description: 로그아웃 성공
@@ -210,6 +215,11 @@ paths:
         - name: username
           in: query
           description: 유저의 닉네임
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: 로그인한 유저의 액세스 토큰
           required: true
           type: string
       responses:
@@ -228,6 +238,10 @@ paths:
                     email: example@exmpale.com
                     profileImg: url
                     introduction: Hello
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
   /user/{id}:
     get:
       tags:
@@ -267,9 +281,9 @@ paths:
                   introduction:
                     type: string
                   followings:
-                    type: integer
+                    type: array
                   followers:
-                    type: integer
+                    type: array
                   me:
                     type: boolean
                 example:
@@ -279,8 +293,6 @@ paths:
                   email: example@example.com
                   profileImg: url
                   introduction: Hello, I'm OOO
-                  followings: 142
-                  followers: 1412
         '404':
           description: 해당 유저를 찾을 수 없음
         '403':
@@ -311,7 +323,37 @@ paths:
       responses:
         '200':
           description: 불러오기 성공
-          
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    content:
+                      type: string
+                    userId:
+                      type: integer
+                    postImgs:
+                      type: array
+                    like:
+                      type: integer
+                      description: 좋아요 수
+                    isLike:
+                      type: boolean
+                      description: 로그인한 유저의 좋아요 여부
+                    deletable:
+                      type: boolean
+                      description: true면 글 삭제 가능, false면 불가능
+                type: boolean
+                me:
+                  description: 현재 보는 프로필이 로그인한 유저의 프로필이면 true 아니면 false
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
   /user/dark:
     patch:
       tags:
@@ -494,6 +536,8 @@ paths:
                       type: string
                     introduction:
                       type: string
+                    private:
+                      type: boolean
         '401':
           description: 유효하지 않은 토큰
         '403':
@@ -519,6 +563,25 @@ paths:
       responses:
         '200':
           description: 팔로워 리스트 불러오기 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    profileImg:
+                      type: string
+                    introduction:
+                      type: string
+                    private:
+                      type: boolean
         '401':
           description: 유효하지 않은 토큰
         '403':
@@ -555,6 +618,7 @@ paths:
                       type: integer
                     deletable:
                       type: boolean
+                      description: true면 글 지우기 가능, false면 불가능
                     like:
                       type: integer
                     content:
@@ -566,7 +630,10 @@ paths:
                       type: integer
                     createdAt:
                       type: date
-                    User:
+                    isLike:
+                      type: boolean
+                      description: true면 좋아요 누름, false면 좋아요 안누름
+                    user:
                       type: array
                       items:
                         type: object
@@ -684,7 +751,7 @@ paths:
           description: 해당 id의 게시물이 존재하지 않음
         '409':
           description: 좋아요를 누르지 않음
-  /post/{id}/comment:
+  /post/{id}/comments:
     get:
       tags:
       - post
@@ -724,6 +791,7 @@ paths:
           description: 토큰 유효기간 만료
         '404':
           description: 해당 id의 게시물이 존재하지 않음
+  /post/{id}/comment:
     post:
       tags:
       - post
