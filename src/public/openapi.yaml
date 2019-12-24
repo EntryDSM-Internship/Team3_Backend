@@ -347,9 +347,9 @@ paths:
                     deletable:
                       type: boolean
                       description: true면 글 삭제 가능, false면 불가능
-                type: boolean
-                me:
-                  description: 현재 보는 프로필이 로그인한 유저의 프로필이면 true 아니면 false
+                    me:
+                      type: boolean
+                      description: 현재 보는 프로필이 로그인한 유저의 프로필이면 true 아니면 false
         '401':
           description: 유효하지 않은 토큰
         '403':
