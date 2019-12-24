@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const jwt = require('../jwt');
+const jwt = require('../utils/jwt');
 const fs = require('fs');
 const path = require('path');
 const {isLoggedIn} = require('../middlewares/loginCheck');
-const User = require('../models').User;
+const {User, Post, PostImgs, sequelize} = require('../models');
 
 const upload = multer({
     storage: multer.diskStorage({
@@ -19,13 +19,67 @@ const upload = multer({
     })
 });
 
-router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, next) => {
-    if(!req.hasOwnProperty('file')) {
-        const error = new Error('사진이 없음');
-        error.status = 400;
-        throw error;
-    }
+router.get('/:id', isLoggedIn, async (req, res, next) => {
+    const id = req.params.id;
+    const decoded = req.decoded;
     try {
+        const user = await User.findOne({
+            attributes: ['private', 'id', 'username', 'email', 'profileImg', 'introduction'],
+            where:{id}
+        });
+        if(!user) {
+            const error = new Error('해당 유저를 찾을 수 없음');
+            error.status = 404;
+            throw error;
+        }
+        const followings = await user.getFollowers({attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']});
+        const followers = await user.getFollowings({attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']});
+        user.dataValues.followings = followings;
+        user.dataValues.followers = followers;
+        user.dataValues.me = decoded.id === user.id ? true : false;
+        return res.status(200).json({status: 200, message: '해당 유저의 프로필 불러오기 성공', user});
+    } catch(err) {
+        next(err);
+    }
+});
+
+router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
+    const {id, page} = req.params;
+    const decoded = req.decoded;
+    try {
+        const user = await User.findOne({where:{id}});
+        if(!user) {
+            const error = new Error('해당 유저를 찾을 수 없음');
+            error.status = 404;
+            throw error;
+        }
+        const posts = await Post.findAll({
+            where:{userId:id},
+            limit: 10,
+            offset: page * 10,
+            include:[{model:PostImgs, required:false}],
+            order: sequelize.literal('createdAt DESC')
+        });
+        for(i in posts) {
+            let isLike = await posts[i].getUsers({where:{id:decoded.id}});
+            let like = await posts[i].getUsers();
+            posts[i].dataValues.like = like.length;
+            posts[i].dataValues.isLike = isLike.length ? true : false;
+            posts[i].dataValues.deletable = posts[i].userId === decoded.id ? true : false;
+        }
+        res.status(200).json({status: 200, message: '불러오기 성공', posts, me: decoded.id === Number(id) ? true : false});
+    } catch(err) {
+        next(err);
+    }
+});
+
+router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, next) => {
+    try {
+        if(!req.hasOwnProperty('file')) {
+            const error = new Error('사진이 없음');
+            error.status = 400;
+            throw error;
+        }
         const decoded = req.decoded;
         const {profileImg} = await User.findOne({where:{id:decoded.id}});
         if(profileImg) {
