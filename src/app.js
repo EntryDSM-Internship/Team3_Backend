@@ -4,7 +4,7 @@ const path = require('path');
 const helmet = require('helmet');
 const sequelize = require('./models').sequelize;
 const hpp = require('hpp');
-const logger = require('./logger');
+const logger = require('./utils/logger');
 const cors = require('cors');
 require('dotenv').config();
 

@@ -1,4 +1,4 @@
-const jwt = require('../jwt');
+const jwt = require('../utils/jwt');
 
 const isLoggedIn = async (req, res, next) => {
     const token = req.get('Authorization');
