@@ -73,6 +73,17 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.patch('/', isLoggedIn, async (req, res, next) => {
+    const decoded = req.decoded;
+    const {username, introduction} = req.body;
+    try {
+        await User.update({username, introduction}, {where:{id:decoded.id}});
+        res.status(200).json({status: 200, message: '프로필 변경 성공'});
+    } catch(err) {
+        next(err);
+    }
+});
+
 router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, next) => {
     try {
         if(!req.hasOwnProperty('file')) {
