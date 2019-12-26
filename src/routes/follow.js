@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('../jwt');
+const jwt = require('../utils/jwt');
 const {isLoggedIn} = require('../middlewares/loginCheck');
 const User = require('../models').User;
 
@@ -33,7 +33,6 @@ router.post('/:id', isLoggedIn, async (req, res, next) => { // TODO 이미 팔�
 
 router.delete('/:id', isLoggedIn, async (req, res, next) => {
     const id = req.params.id; // 팔로우 취소 당할 유저의 id
-    const token = req.get('Authorization'); 
     try {
         const decoded = req.decoded;
         const deleted = await User.findOne({where:{id}});

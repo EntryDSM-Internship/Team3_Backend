@@ -6,9 +6,11 @@ const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 const fs = require('fs');
 const multer = require('multer');
-const jwt = require('../jwt');
+const jwt = require('../utils/jwt');
 const path = require('path');
-const {codeGenerator} = require('../codeGenerator');
+const codeGenerator = require('../utils/codeGenerator');
+const emailHTML = require('../utils/emailHTML');
+const bcrypt = require('bcrypt-nodejs');
 require('dotenv').config();
 
 fs.readdir('profileImgs', (error) => {
@@ -47,7 +49,7 @@ router.patch('/refresh', async (req, res, next) => {
     } catch(err) {
         next(err);
     }
-})
+});
 
 router.post('/email-check', async (req, res, next) => {
     const {email} = req.body;
@@ -71,7 +73,7 @@ router.post('/email-check', async (req, res, next) => {
             from: process.env.MAIL_USER,
             to: email,
             subject: 'Squeaker 이메일 인증',
-            text: authCode
+            html: emailHTML(authCode)
         };
         transporter.sendMail(mailOptions, (error, info) => {
             if(error) {
@@ -113,9 +115,11 @@ router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
             err.status = 401;
             throw err;
         }
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
         await User.create({
             email,
-            password,
+            password: hash,
             username,
             introduction: introduction ? introduction : null, 
             profileImg: req.hasOwnProperty('file') ? req.file.filename : null
@@ -133,7 +137,7 @@ router.post('/login', async (req, res, next) => {
     const {email, password} = req.body;
     try {
         const user = await User.findOne({where:{email}});
-        if(!user || user.password !== password) {
+        if(!user || !bcrypt.compareSync(password, user.password)) {
             const err = new Error('이메일 또는 비밀번호가 틀림');
             err.status = 400;
             throw err;
