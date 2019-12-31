@@ -19,7 +19,8 @@ const userRouter = require('./routes/user');
 
 app.set('port', process.env.PORT || 3001);
 app.use('/', express.static(path.join(__dirname, 'public')));
-app.use('/profiles', express.static(path.join(__dirname, 'profileImgs')));
+app.use('/profileimgs', express.static(path.join(__dirname, 'profileImgs')));
+app.use('/postimgs', express.static(path.join(__dirname, 'postImgs')));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 if(process.env.NODE_ENV === 'production') {

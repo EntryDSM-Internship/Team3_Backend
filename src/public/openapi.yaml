@@ -679,6 +679,30 @@ paths:
         '401':
           description: 유효하지 않은 토큰
   /post/{id}:
+    get:
+      tags:
+      - post
+      summary: 게시물 불러오기
+      parameters:
+        - name: Authorization
+          in: header
+          description: 현재 로그인한 유저의 액세스 토큰
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 불러올 게시물의  고유 식별번호
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 게시물 불러오기 성공
+        '401':
+          description: 유효하지 않은 토큰
+        '403':
+          description: 토큰 유효기간 만료
+        '404':
+          description: 게시물이 존재하지 않음
     delete:
       tags:
       - post

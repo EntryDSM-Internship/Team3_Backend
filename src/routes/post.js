@@ -26,7 +26,7 @@ const upload = multer({
 });
 
 router.post('/', isLoggedIn, upload.array('imgs', 4), async (req, res, next) => {
-    const {content} = req.body;
+    const content = req.body.content;
     try {
         const decoded = req.decoded;
         const post = await Post.create({
@@ -40,6 +40,33 @@ router.post('/', isLoggedIn, upload.array('imgs', 4), async (req, res, next) => 
             });
         });
         return res.status(201).json({status: 201, message: '게시물 올리기 성공'});
+    } catch(err) {
+        next(err);
+    }
+});
+
+router.get('/:id', isLoggedIn, async (req, res, next) => {
+    const id = req.params.id;
+    const decoded = req.decoded;
+    try {
+        const post = await Post.findOne({
+            where: {id},
+            include: [
+                {model:PostImgs, required:false}, 
+                {model:User, required:true, attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']}
+            ]
+        });
+        if(!post) {
+            const error = new Error('게시물이 존재하지 않음');
+            error.status = 404;
+            throw error;
+        }
+        const isLike = await post.getUsers({where:{id:decoded.id}});
+        const like = await post.getUsers();
+        post.dataValues.like = like.length;
+        post.dataValues.isLike = isLike.length ? true : false;
+        post.dataValues.deletable = post.userId === decoded.id ? true : false;
+        res.status(200).json({status: 200, message: '게시물 불러오기 성공', post});
     } catch(err) {
         next(err);
     }
