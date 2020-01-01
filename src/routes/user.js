@@ -5,7 +5,8 @@ const jwt = require('../utils/jwt');
 const fs = require('fs');
 const path = require('path');
 const {isLoggedIn} = require('../middlewares/loginCheck');
-const {User, Post, PostImgs, sequelize} = require('../models');
+const {User, Post, PostImgs, sequelize, Sequelize} = require('../models');
+const Op = Sequelize.Op;
 
 const upload = multer({
     storage: multer.diskStorage({
@@ -34,9 +35,11 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
         }
         const followings = await user.getFollowers({attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']});
         const followers = await user.getFollowings({attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']});
+        const isFollow = await user.getFollowings({where:{id:decoded.id}});
         user.dataValues.followings = followings;
         user.dataValues.followers = followers;
         user.dataValues.me = decoded.id === user.id ? true : false;
+        user.dataValues.isFollow = isFollow.length ? true : false;
         return res.status(200).json({status: 200, message: '해당 유저의 프로필 불러오기 성공', user});
     } catch(err) {
         next(err);
