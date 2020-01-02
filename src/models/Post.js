@@ -1,8 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define('post', {
         content: {
-            type: DataTypes.STRING(512),
-            allowNull: false
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     }, {
         timestamps: true,
