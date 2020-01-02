@@ -56,4 +56,17 @@ router.get('/users', isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.get('/userinfo', isLoggedIn, async (req, res, next) => {
+    const decoded = req.decoded;
+    try {
+        const user = await User.findOne({
+            where:{id:decoded.id},
+            attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private', 'dark']
+        });
+        res.status(200).json({status: 200, message: '유저 정보', user});
+    } catch(err) {
+        next(err);
+    }
+});
+
 module.exports = router;
