@@ -24,6 +24,12 @@ router.post('/:id', isLoggedIn, async (req, res, next) => { // TODO 이미 팔�
             error.status = 409;
             throw error;
         }
+        const isFollow = await followed.getFollowings({where:{id:decoded.id}});
+        if(isFollow) {
+            const error = new Error('이미 팔로우함');
+            error.status = 409;
+            throw error;
+        }
         await followed.addFollowings(decoded.id);
         return res.status(201).json({status: 201, message: '팔로우 성공'});
     } catch(err) {
