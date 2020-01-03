@@ -1,7 +1,7 @@
 const express = require('express');
 const {isLoggedIn} = require('../middlewares/loginCheck')
 const Op = require('sequelize').Op;
-const {User, Post, sequelize, PostImgs} = require('../models');
+const {User, Post, sequelize, PostImgs, Comment} = require('../models');
 const router = express.Router();
 
 router.get('/posts/:page', isLoggedIn, async (req, res, next) => {
@@ -27,7 +27,8 @@ router.get('/posts/:page', isLoggedIn, async (req, res, next) => {
             offset: page,
             include: [
                 {model:PostImgs, required:false, attributes: ['name', 'postId']},
-                {model:User, required:true, attributes: ['id', 'username', 'email', 'profileImg', 'private']}
+                {model:User, required:true, attributes: ['id', 'username', 'email', 'profileImg', 'private']},
+                {model:Comment, required:false}
             ]
         });
         for(i in posts) {
@@ -36,6 +37,7 @@ router.get('/posts/:page', isLoggedIn, async (req, res, next) => {
             posts[i].dataValues.like = like.length;
             posts[i].dataValues.isLike = isLike.length ? true : false;
             posts[i].dataValues.deletable = posts[i].userId === decoded.id ? true : false;
+            posts[i].dataValues.comments = posts[i].comments.length;
         }
         return res.status(200).json({status: 200, message: '게시물 불러오기 성공', posts});
     } catch(err) {

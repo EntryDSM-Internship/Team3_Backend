@@ -5,7 +5,7 @@ const jwt = require('../utils/jwt');
 const fs = require('fs');
 const path = require('path');
 const {isLoggedIn} = require('../middlewares/loginCheck');
-const {User, Post, PostImgs, sequelize, Sequelize} = require('../models');
+const {User, Post, PostImgs, sequelize, Sequelize, Comment} = require('../models');
 const Op = Sequelize.Op;
 
 const upload = multer({
@@ -62,7 +62,11 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
             where:{userId:id},
             limit: 10,
             offset: page * 10,
-            include:[{model:PostImgs, required:false}, {model:User, required:true, attributes:['id', 'username', 'email', 'private', 'profileImg', 'introduction']}],
+            include:[
+                {model:PostImgs, required:false}, 
+                {model:User, required:true, attributes:['id', 'username', 'email', 'private', 'profileImg', 'introduction']},
+                {model:Comment, required:false}
+            ],
             order: sequelize.literal('createdAt DESC')
         });
         for(i in posts) {
@@ -71,8 +75,9 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
             posts[i].dataValues.like = like.length;
             posts[i].dataValues.isLike = isLike.length ? true : false;
             posts[i].dataValues.deletable = posts[i].userId === decoded.id ? true : false;
+            posts[i].dataValues.comments = posts[i].comments.length;
         }
-        res.status(200).json({status: 200, message: '불러오기 성공', posts, me: decoded.id === Number(id) ? true : false, user});
+        res.status(200).json({status: 200, message: '불러오기 성공', posts, me: decoded.id === Number(id) ? true : false});
     } catch(err) {
         next(err);
     }
