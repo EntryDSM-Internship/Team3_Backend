@@ -51,8 +51,7 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
     const decoded = req.decoded;
     try {
         const user = await User.findOne({
-            where:{id},
-            attributes:['id', 'private', 'username', 'email', 'profileImg', 'introduction']
+            where:{id}
         });
         if(!user) {
             const error = new Error('해당 유저를 찾을 수 없음');
@@ -63,7 +62,7 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
             where:{userId:id},
             limit: 10,
             offset: page * 10,
-            include:[{model:PostImgs, required:false}],
+            include:[{model:PostImgs, required:false}, {model:User, required:true, attributes:['id', 'username', 'email', 'private', 'profileImg', 'introduction']}],
             order: sequelize.literal('createdAt DESC')
         });
         for(i in posts) {
