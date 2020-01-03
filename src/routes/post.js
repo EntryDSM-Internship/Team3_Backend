@@ -53,7 +53,8 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
             where: {id},
             include: [
                 {model:PostImgs, required:false}, 
-                {model:User, required:true, attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']}
+                {model:User, required:true, attributes:['id', 'username', 'email', 'profileImg', 'introduction', 'private']},
+                {model:Comment, required:false}
             ]
         });
         if(!post) {
@@ -61,11 +62,17 @@ router.get('/:id', isLoggedIn, async (req, res, next) => {
             error.status = 404;
             throw error;
         }
+        if(post.user.private && decoded.id !== post.user.id) {
+            const error = new Error('비공개 유저 게시물에 접근');
+            error.status = 409;
+            throw error;
+        }
         const isLike = await post.getUsers({where:{id:decoded.id}});
         const like = await post.getUsers();
         post.dataValues.like = like.length;
         post.dataValues.isLike = isLike.length ? true : false;
         post.dataValues.deletable = post.userId === decoded.id ? true : false;
+        post.dataValues.comments = post.comments.length;
         res.status(200).json({status: 200, message: '게시물 불러오기 성공', post});
     } catch(err) {
         next(err);
