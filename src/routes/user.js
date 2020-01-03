@@ -50,7 +50,10 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
     const {id, page} = req.params;
     const decoded = req.decoded;
     try {
-        const user = await User.findOne({where:{id}});
+        const user = await User.findOne({
+            where:{id},
+            attributes:['id', 'private', 'username', 'email', 'profileImg', 'introduction']
+        });
         if(!user) {
             const error = new Error('해당 유저를 찾을 수 없음');
             error.status = 404;
@@ -70,7 +73,7 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
             posts[i].dataValues.isLike = isLike.length ? true : false;
             posts[i].dataValues.deletable = posts[i].userId === decoded.id ? true : false;
         }
-        res.status(200).json({status: 200, message: '불러오기 성공', posts, me: decoded.id === Number(id) ? true : false});
+        res.status(200).json({status: 200, message: '불러오기 성공', posts, me: decoded.id === Number(id) ? true : false, user});
     } catch(err) {
         next(err);
     }
