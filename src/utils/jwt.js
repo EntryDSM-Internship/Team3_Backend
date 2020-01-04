@@ -19,7 +19,7 @@ const generateEmailToken = (email) => jwtBlacklist.sign({
   email,
 }, process.env.JWT, {
   subject: 'email',
-  expiresIn: '1m',
+  expiresIn: '30m',
 });
 
 const verify = (token) => {
