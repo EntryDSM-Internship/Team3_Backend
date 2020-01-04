@@ -1,5 +1,4 @@
-module.exports = (authCode) => {
-    return `<!DOCTYPE html>
+module.exports = (authCode) => `<!DOCTYPE html>
             <html lang="kr">
             <head>
                 <meta charset="UTF-8">
@@ -90,5 +89,4 @@ module.exports = (authCode) => {
                     </div>
                 </main>
             </body>
-            </html>`
-}
+            </html>`;
