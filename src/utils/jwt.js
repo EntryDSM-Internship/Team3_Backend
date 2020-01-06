@@ -12,7 +12,7 @@ const generateToken = (id, username, email, sub) => jwtBlacklist.sign({
   email,
 }, process.env.JWT, {
   subject: sub,
-  expiresIn: sub === ACCESS ? '2h' : '7d',
+  expiresIn: sub === ACCESS ? '3m' : '5m',
 });
 
 const generateEmailToken = (email) => jwtBlacklist.sign({
