@@ -65,6 +65,11 @@ router.get('/:id/posts/:page', isLoggedIn, async (req, res, next) => {
       error.status = 404;
       throw error;
     }
+    if (user.private && user.id !== decoded.id) {
+      const error = new Error('비공개 계정에 접근');
+      error.status = 409;
+      throw error;
+    }
     const posts = await Post.findAll({
       where: { userId: id },
       limit: 10,
