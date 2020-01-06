@@ -56,6 +56,11 @@ router.patch('/refresh', async (req, res, next) => {
 router.post('/email-check', async (req, res, next) => {
   const { email } = req.body;
   try {
+    if (email.length > 320) {
+      const error = new Error('이메일이 너무 길음');
+      error.status = 400;
+      throw error;
+    }
     const user = await User.findOne({ where: { email } });
     if (user) {
       const err = new Error('이메일 중복');
@@ -119,6 +124,11 @@ router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
     if (decode.sub !== 'email' || decode.email !== email) {
       const error = new Error('유효하지 않은 토큰');
       error.status = 401;
+      throw error;
+    }
+    if (username.length > 12 || password.length < 8 || introduction.length > 60 || email.length > 320) {
+      const error = new Error('요청 데이터가 너무 많음');
+      error.status = 400;
       throw error;
     }
     const salt = bcrypt.genSaltSync(10);

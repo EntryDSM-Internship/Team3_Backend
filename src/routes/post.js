@@ -27,9 +27,14 @@ const upload = multer({
   }),
 });
 
-router.post('/', isLoggedIn, upload.array('imgs', 4), async (req, res, next) => {
+router.post('/', isLoggedIn, upload.array('imgs'), async (req, res, next) => {
   const { content } = req.body;
   try {
+    if (!content.length || content.length > 256 || req.files.length > 4) {
+      const error = new Error('요청 데이터가 너무 많음');
+      error.status = 400;
+      throw error;
+    }
     const { decoded } = req;
     const post = await Post.create({
       userId: decoded.id,
@@ -156,6 +161,11 @@ router.post('/:id/comment', isLoggedIn, async (req, res, next) => {
     if (!post) {
       const error = new Error('해당 id의 게시물이 존재하지 않음');
       error.status = 404;
+      throw error;
+    }
+    if (comment.length > 256) {
+      const error = new Error('요청 데이터가 너무 많음');
+      error.status = 400;
       throw error;
     }
     await Comment.create({

@@ -1,15 +1,15 @@
 module.exports = (sequelize, DataTypes) => sequelize.define('user', {
   username: {
-    type: DataTypes.STRING(32),
+    type: DataTypes.STRING(12),
     allowNull: false,
   },
   email: {
-    type: DataTypes.STRING(64),
+    type: DataTypes.STRING(320),
     allowNull: false,
     unique: true,
   },
   password: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING(60),
     allowNull: false,
   },
   profileImg: {
@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => sequelize.define('user', {
     allowNull: true,
   },
   introduction: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING(60),
     allowNull: true,
   },
   refreshTok: {
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => sequelize.define('user', {
     allowNull: true,
   },
   private: { // 0이면 공개, 1이면 비공개
-    type: DataTypes.BOOLEAN(11),
+    type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: 0,
   },
