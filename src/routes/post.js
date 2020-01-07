@@ -27,7 +27,7 @@ const upload = multer({
   }),
 });
 
-router.post('/', isLoggedIn, upload.array('imgs'), async (req, res, next) => {
+router.post('/', isLoggedIn, upload.array('imgs', 4), async (req, res, next) => {
   const { content } = req.body;
   console.log(req.files);
   try {
