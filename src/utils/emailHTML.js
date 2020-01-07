@@ -82,7 +82,7 @@ module.exports = (authCode) => `<!DOCTYPE html>
                                 <p style="font-weight: bold;">아래의 인증번호를 진행 중인 회원가입 인증번호란에 입력해 주세요.</p>
                                 <p style="font-weight: bold;">감사합니다.</p>
                             </div>
-                            <div id="code" style="width: 151px; height: 44px; margin-bottom: 70px;">
+                            <div id="code" style="width: auto; height: 44px; margin-bottom: 70px;">
                                 <h1 style="font-size: 44px; color: #505bda; height: 100%; line-height: 44px;">${authCode}</h1>
                             </div>
                         </div>
