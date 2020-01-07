@@ -163,7 +163,7 @@ router.post('/:id/comment', isLoggedIn, async (req, res, next) => {
       error.status = 404;
       throw error;
     }
-    if (comment.length > 256) {
+    if (!comment || comment.length > 256) {
       const error = new Error('요청 데이터가 너무 많음');
       error.status = 400;
       throw error;
