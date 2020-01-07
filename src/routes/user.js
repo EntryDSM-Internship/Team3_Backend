@@ -112,13 +112,13 @@ router.patch('/', isLoggedIn, async (req, res, next) => {
 
 router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, next) => {
   try {
+    console.log(req.file);
     if ({}.hasOwnProperty.call(req, 'file')) {
       const error = new Error('사진이 없음');
       error.status = 400;
       throw error;
     }
     const { decoded } = req;
-    console.log(req.file);
     const { profileImg } = await User.findOne({ where: { id: decoded.id } });
     if (profileImg) {
       fs.unlink(path.join(__dirname, '..', 'profileImgs', profileImg), (err) => {
