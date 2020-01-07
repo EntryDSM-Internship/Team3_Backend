@@ -112,8 +112,7 @@ router.patch('/', isLoggedIn, async (req, res, next) => {
 
 router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, next) => {
   try {
-    console.log(req.file);
-    if ({}.hasOwnProperty.call(req, 'file')) {
+    if (!{}.hasOwnProperty.call(req, 'file')) {
       const error = new Error('사진이 없음');
       error.status = 400;
       throw error;
