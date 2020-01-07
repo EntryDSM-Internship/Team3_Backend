@@ -1,3 +1,5 @@
+const getDate = require('./getDate');
+
 module.exports = (authCode) => `<!DOCTYPE html>
             <html lang="kr">
             <head>
@@ -85,7 +87,7 @@ module.exports = (authCode) => `<!DOCTYPE html>
                             </div>
                         </div>
                         <div id="footer" style="width: 100%; height: 2px; background-color: #bcbcbc; margin-bottom: 20px;"></div>
-                        <span>발송기준일: ${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}</span>
+                        <span>발송기준일: ${new Date().getFullYear()}-${getDate.getMonth()}-${getDate.getDay()}</span>
                     </div>
                 </main>
             </body>
