@@ -126,7 +126,9 @@ router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
       error.status = 401;
       throw error;
     }
-    if (username.length > 12 || password.length < 8 || introduction.length > 60 || email.length > 30) {
+    const chkNum = password.search(/[0-9]/g);
+    const chkEng = password.search(/[a-z]/ig);
+    if (username.length > 12 || password.length < 8 || introduction.length > 60 || email.length > 30 || chkNum < 0 || chkEng < 0) {
       const error = new Error('요청 데이터가 너무 많음');
       error.status = 400;
       throw error;
