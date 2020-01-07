@@ -118,6 +118,7 @@ router.patch('/img', isLoggedIn, upload.single('profileImg'), async (req, res, n
       throw error;
     }
     const { decoded } = req;
+    console.log(req.file);
     const { profileImg } = await User.findOne({ where: { id: decoded.id } });
     if (profileImg) {
       fs.unlink(path.join(__dirname, '..', 'profileImgs', profileImg), (err) => {
