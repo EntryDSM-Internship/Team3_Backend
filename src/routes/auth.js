@@ -138,7 +138,7 @@ router.post('/signup', upload.single('profileImg'), async (req, res, next) => {
       password: hash,
       username,
       introduction: introduction || null,
-      profileImg: {}.hasOwnProperty.call(req, 'file') ? req.file.filename : null,
+      profileImg: {}.hasOwnProperty.call(req, 'file') ? req.file.filename : '기본.png',
     });
     res.status(201).json({ status: 201, message: '회원가입 성공' });
   } catch (err) {
