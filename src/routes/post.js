@@ -30,7 +30,7 @@ const upload = multer({
 router.post('/', isLoggedIn, upload.array('imgs'), async (req, res, next) => {
   const { content } = req.body;
   try {
-    if (!content.length || content.length > 256 || req.files.length > 4) {
+    if (!content || content.length > 256 || req.files.length > 4) {
       const error = new Error('요청 데이터가 너무 많음');
       error.status = 400;
       throw error;
